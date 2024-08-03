@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>STOPWATCH</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #6600ea;
+      color: #eee;
+    }
+
+   .container {
+      background-color: #2b2d2b;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #time {
+      font-size: 4em;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>STOPWATCH</h1>
+    <div id="time">00:00:00</div>
+    
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+    <button id="lap">Lap</button>
+    <button id="reset">Reset</button>
+
+    <h2>Lap Times</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Lap</th>
+          <th>Time</th>
+          <th>Overall Time</th>
+        </tr>
+      </thead>
+      <tbody id="lapTimes">
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    let startTime = 0;
+    let elapsedTime = 0;
+    let timerInterval;
+    let lapCount = 0;
+    let lapTimes = {};
+    let overallTime = 0;
+
+    const timeElement = document.getElementById("time");
+    const overallTimeElement = document.getElementById("overallTime");
+    const startButton = document.getElementById("start");
+    const stopButton = document.getElementById("stop");
+    const lapButton = document.getElementById("lap");
+    const resetButton = document.getElementById("reset");
+    const lapTimesTableBody = document.getElementById("lapTimes");
+
+    function formatTime(ms) {
+      const minutes = Math.floor(ms / 60000);
+      const seconds = Math.floor((ms % 60000) / 1000);
+      const milliseconds = Math.floor((ms % 1000) / 10);
+      return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}:${milliseconds.toString().padStart(2, '0')}`;
+    }
+
+    function startTimer() {
+      startTime = Date.now() - elapsedTime;
+      timerInterval = setInterval(updateTimer, 10);
+      startButton.disabled = true;
+      stopButton.disabled = false;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      elapsedTime = Date.now() - startTime;
+      startButton.disabled = false;
+      stopButton.disabled = true;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      elapsedTime = 0;
+      startTime = 0;
+      timeElement.textContent = "00:00:00";
+      overallTimeElement.textContent = "Overall Time: 00:00:00";
+      lapCount = 0;
+      lapTimes = {};
+      overallTime = 0;
+      lapTimesTableBody.innerHTML = "";
+      startButton.disabled = false;
+      stopButton.disabled = true;
+    }
+
+    function updateTimer() {
+      const currentTime = Date.now() - startTime;
+      timeElement.textContent = formatTime(currentTime);
+      overallTimeElement.textContent = `Overall Time: ${formatTime(currentTime + overallTime)}`;
+    }
+
+    function recordLap() {
+      lapCount++;
+      const lapTime = Date.now() - startTime;
+      lapTimes[lapCount] = formatTime(lapTime);
+      overallTime += lapTime;
+
+      const newRow = lapTimesTableBody.insertRow();
+      newRow.insertCell().textContent = lapCount;
+      newRow.insertCell().textContent = lapTimes[lapCount];
+      newRow.insertCell().textContent = formatTime(overallTime);
+
+      overallTimeElement.textContent = `Overall Time: ${formatTime(overallTime)}`;
+    }
+
+    function timeToMilliseconds(time) {
+      const [minutes, seconds, milliseconds] = time.split(':').map(Number);
+      return minutes * 60 * 1000 + seconds * 1000 + milliseconds * 10;
+    }
+
+    startButton.addEventListener("click", startTimer);
+    stopButton.addEventListener("click", stopTimer);
+    resetButton.addEventListener("click", resetTimer);
+    lapButton.addEventListener("click", recordLap);
+  </script>
+</body>
+</html>
